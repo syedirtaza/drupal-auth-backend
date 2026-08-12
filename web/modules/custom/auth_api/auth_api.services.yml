@@ -1,0 +1,6 @@
+services:
+  auth_api.cors_subscriber:
+    class: Drupal\auth_api\EventSubscriber\CorsSubscriber
+    arguments: ['@settings']
+    tags:
+      - { name: event_subscriber }

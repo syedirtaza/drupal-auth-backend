@@ -1,0 +1,7 @@
+name: Auth Service
+type: module
+description: Provides account, password reset, and JWT token services for the auth API.
+package: Custom
+core_version_requirement: ^11
+dependencies:
+  - drupal:user

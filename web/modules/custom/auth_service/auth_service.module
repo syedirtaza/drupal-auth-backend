@@ -1,0 +1,22 @@
+<?php
+
+/**
+ * @file
+ * Mail hooks for the auth service module.
+ */
+
+/**
+ * Implements hook_mail().
+ */
+function auth_service_mail($key, &$message, $params): void {
+  if ($key !== 'password_reset') {
+    return;
+  }
+
+  $message['subject'] = t('Reset your @site password', ['@site' => $params['site_name']]);
+  $message['body'][] = t('A password reset was requested for your account.');
+  $message['body'][] = t('Use this secure link to choose a new password: @url', ['@url' => $params['reset_url']]);
+  $message['body'][] = t('This link expires in @minutes minutes. If you did not request it, you can ignore this email.', [
+    '@minutes' => $params['expires_minutes'],
+  ]);
+}

@@ -1,0 +1,55 @@
+auth_api.register:
+  path: '/api/auth/register'
+  defaults:
+    _controller: '\Drupal\auth_api\Controller\AuthApiController::register'
+  requirements:
+    _access: 'TRUE'
+  methods: [POST, OPTIONS]
+
+auth_api.login:
+  path: '/api/auth/login'
+  defaults:
+    _controller: '\Drupal\auth_api\Controller\AuthApiController::login'
+  requirements:
+    _access: 'TRUE'
+  methods: [POST, OPTIONS]
+
+auth_api.forgot_password:
+  path: '/api/auth/forgot-password'
+  defaults:
+    _controller: '\Drupal\auth_api\Controller\AuthApiController::forgotPassword'
+  requirements:
+    _access: 'TRUE'
+  methods: [POST, OPTIONS]
+
+auth_api.reset_password:
+  path: '/api/auth/reset-password'
+  defaults:
+    _controller: '\Drupal\auth_api\Controller\AuthApiController::resetPassword'
+  requirements:
+    _access: 'TRUE'
+  methods: [POST, OPTIONS]
+
+auth_api.me:
+  path: '/api/user/me'
+  defaults:
+    _controller: '\Drupal\auth_api\Controller\UserApiController::me'
+  requirements:
+    _access: 'TRUE'
+  methods: [GET, OPTIONS]
+
+auth_api.swagger:
+  path: '/api/docs'
+  defaults:
+    _controller: '\Drupal\auth_api\Controller\DocsController::swagger'
+  requirements:
+    _access: 'TRUE'
+  methods: [GET]
+
+auth_api.openapi:
+  path: '/api/docs/openapi.yml'
+  defaults:
+    _controller: '\Drupal\auth_api\Controller\DocsController::openApi'
+  requirements:
+    _access: 'TRUE'
+  methods: [GET]

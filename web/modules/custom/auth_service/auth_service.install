@@ -1,0 +1,58 @@
+<?php
+
+/**
+ * @file
+ * Install and update hooks for demo authentication data.
+ */
+
+/**
+ * Creates the demo login account when the auth service module is installed.
+ */
+function auth_service_install(): void {
+  auth_service_seed_demo_user();
+}
+
+/**
+ * Adds the demo login account for sites where the module is already enabled.
+ */
+function auth_service_update_11001(): string {
+  auth_service_seed_demo_user();
+  return 'Created or refreshed the demo auth user.';
+}
+
+/**
+ * Creates or refreshes a known local demo user for end-to-end testing.
+ */
+function auth_service_seed_demo_user(): void {
+  $demo = [
+    'name' => 'demo',
+    'mail' => 'demo@example.com',
+    'pass' => 'DemoPassword123!',
+  ];
+
+  $storage = \Drupal::entityTypeManager()->getStorage('user');
+  $accounts = $storage->loadByProperties(['mail' => $demo['mail']]);
+  $account = reset($accounts) ?: NULL;
+
+  if ($account === NULL) {
+    $accounts = $storage->loadByProperties(['name' => $demo['name']]);
+    $account = reset($accounts) ?: NULL;
+  }
+
+  if ($account === NULL) {
+    $account = $storage->create([
+      'name' => $demo['name'],
+      'mail' => $demo['mail'],
+      'status' => 1,
+    ]);
+    $account->enforceIsNew();
+  }
+  else {
+    $account->setUsername($demo['name']);
+    $account->setEmail($demo['mail']);
+    $account->activate();
+  }
+
+  $account->setPassword($demo['pass']);
+  $account->save();
+}

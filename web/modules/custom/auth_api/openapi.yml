@@ -1,0 +1,215 @@
+openapi: 3.0.3
+info:
+  title: Drupal Auth API
+  version: 1.0.0
+  description: JWT authentication endpoints implemented as Drupal 11 custom modules.
+  license:
+    name: Proprietary
+servers:
+  - url: http://localhost/drupal/backend/web
+paths:
+  /api/auth/register:
+    post:
+      operationId: registerUser
+      summary: Register a user and create a JWT session.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '201':
+          description: User registered.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthSession'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+  /api/auth/login:
+    post:
+      operationId: loginUser
+      summary: Exchange credentials for a JWT session.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Login succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthSession'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /api/auth/forgot-password:
+    post:
+      operationId: requestPasswordReset
+      summary: Request password reset instructions.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email]
+              properties:
+                email:
+                  type: string
+                  format: email
+      responses:
+        '200':
+          description: Generic reset response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForgotPasswordResponse'
+  /api/auth/reset-password:
+    post:
+      operationId: resetPassword
+      summary: Reset a password with a valid reset token.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResetPasswordRequest'
+      responses:
+        '200':
+          description: Password updated.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '422':
+          $ref: '#/components/responses/ValidationError'
+  /api/user/me:
+    get:
+      operationId: getCurrentUser
+      summary: Return the current JWT-authenticated user.
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Current user.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    $ref: '#/components/schemas/User'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  responses:
+    Unauthorized:
+      description: Authentication failed.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    ValidationError:
+      description: Validation failed.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+  schemas:
+    RegisterRequest:
+      type: object
+      required: [email, password]
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          minLength: 12
+    LoginRequest:
+      type: object
+      required: [identifier, password]
+      properties:
+        identifier:
+          type: string
+          description: Drupal username or email address.
+        password:
+          type: string
+    ResetPasswordRequest:
+      type: object
+      required: [uid, token, password]
+      properties:
+        uid:
+          type: integer
+        token:
+          type: string
+        password:
+          type: string
+          minLength: 12
+    ForgotPasswordResponse:
+      type: object
+      properties:
+        message:
+          type: string
+        uid:
+          type: integer
+          description: Present only when local reset-token exposure is enabled.
+        resetToken:
+          type: string
+          description: Present only when local reset-token exposure is enabled.
+        resetUrl:
+          type: string
+          format: uri
+          description: Present only when local reset-token exposure is enabled.
+    AuthSession:
+      type: object
+      properties:
+        tokenType:
+          type: string
+          example: Bearer
+        accessToken:
+          type: string
+        expiresAt:
+          type: integer
+        user:
+          $ref: '#/components/schemas/User'
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        roles:
+          type: array
+          items:
+            type: string
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            message:
+              type: string

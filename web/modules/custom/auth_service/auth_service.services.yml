@@ -1,0 +1,13 @@
+services:
+  auth_service.authentication:
+    class: Drupal\auth_service\Services\AuthenticationService
+    arguments:
+      - '@entity_type.manager'
+      - '@user.auth'
+      - '@datetime.time'
+      - '@settings'
+      - '@keyvalue.expirable'
+      - '@plugin.manager.mail'
+      - '@language_manager'
+      - '@request_stack'
+      - '@http_client'

@@ -1,0 +1,8 @@
+name: Auth API
+type: module
+description: Exposes JSON authentication endpoints and Swagger documentation.
+package: Custom
+core_version_requirement: ^11
+dependencies:
+  - auth_service:auth_service
+
