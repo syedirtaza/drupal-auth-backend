@@ -1,8 +1,8 @@
 {
-    "name": "example/drupal-auth-backend",
-    "description": "Drupal 11 backend exposing JWT authentication APIs for a separate frontend.",
+    "name": "syedirtaza/drupal-auth-backend",
+    "description": "Reusable Drupal 11 backend API for registration, login, JWT sessions, password reset, and notification-service email integration.",
     "type": "project",
-    "license": "proprietary",
+    "license": "MIT",
     "require": {
         "php": ">=8.3",
         "composer/installers": "^2.3",
