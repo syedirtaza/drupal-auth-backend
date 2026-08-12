@@ -9,16 +9,16 @@ Drupal 11 backend project for a separate TypeScript frontend. The custom impleme
 
 The backend follows a small service/API split so the domain logic is not coupled to HTTP controllers.
 
+This repository intentionally tracks the Drupal project definition and custom modules. Composer and Drupal generate the full runtime after install, so GitHub will not contain `vendor/`, Drupal core, local settings, or uploaded files unless they are generated locally.
+
+Tracked source layout:
+
 ```text
 backend/
   composer.json
+  composer.lock
+  .env.example
   web/
-    index.php
-    core/
-    sites/default/
-      settings.php
-      settings.local.php
-      files/.ht.sqlite
     modules/custom/
       auth_service/
         auth_service.info.yml
@@ -35,6 +35,18 @@ backend/
         src/Controller/UserApiController.php
         src/Controller/DocsController.php
         src/EventSubscriber/CorsSubscriber.php
+```
+
+Generated after `composer install` and Drupal installation:
+
+```text
+backend/vendor/
+backend/web/core/
+backend/web/index.php
+backend/web/.ht.router.php
+backend/web/sites/default/settings.php
+backend/web/default/files/.ht.sqlite
+backend/web/sites/default/files/
 ```
 
 ### Module Responsibilities
@@ -78,26 +90,27 @@ Swagger can be used to inspect every auth endpoint and test requests manually. F
 Bearer <accessToken from /api/auth/login>
 ```
 
-## Install
+## Install From GitHub
 
 Prerequisites:
 
 - PHP 8.3 or newer for Drupal 11.
-- PHP `gd` extension enabled in the CLI and web SAPIs.
+- PHP extensions required by Drupal, including `curl`, `fileinfo`, `gd`, `intl`, `mbstring`, `openssl`, `pdo_sqlite`, `sodium`, and `zip`.
 - Composer 2.x.
 
-This workspace also includes a local portable PHP runtime at `.tools/php-8.5`, which avoids the older XAMPP PHP runtime.
+From a fresh clone, install dependencies. The command below uses the workspace portable PHP runtime; use `composer install` if Composer and PHP are globally available.
 
 ```powershell
 Set-Location C:\xampp\htdocs\drupal\backend
-composer install
+..\.tools\php-8.5\php.exe ..\.tools\composer.phar install
 ```
 
-Install Drupal 11 normally with the document root pointed at `backend/web`. After Drupal is installed, enable the custom modules:
+Install Drupal with SQLite for local development:
 
 ```powershell
-vendor\bin\drush en auth_service auth_api -y
-vendor\bin\drush cr
+..\.tools\php-8.5\php.exe vendor\bin\drush.php site:install minimal --db-url=sqlite://sites/default/files/.ht.sqlite --site-name="Drupal Auth API" --account-name=admin --account-pass=AdminPassword123! -y
+..\.tools\php-8.5\php.exe vendor\bin\drush.php en auth_service auth_api -y
+..\.tools\php-8.5\php.exe vendor\bin\drush.php cr
 ```
 
 Enabling `auth_service` seeds a local demo account:
@@ -107,18 +120,18 @@ Email or username: demo@example.com
 Password: DemoPassword123!
 ```
 
-If the module was already enabled before this seed was added, run updates once:
+If the module was already enabled and the demo account is missing, run updates once:
 
 ```powershell
-vendor\bin\drush updb -y
-vendor\bin\drush cr
+..\.tools\php-8.5\php.exe vendor\bin\drush.php updb -y
+..\.tools\php-8.5\php.exe vendor\bin\drush.php cr
 ```
 
 If Drush is not installed, enable `Auth Service` and `Auth API` from Drupal's Extend page and clear caches from the admin UI.
 
 ## Run Without XAMPP
 
-From the workspace root, dependencies and Drupal have been installed with portable PHP and SQLite. Start the backend with:
+After dependencies and Drupal are installed, start the backend with:
 
 ```powershell
 Set-Location C:\xampp\htdocs\drupal\backend\web
@@ -133,7 +146,7 @@ http://127.0.0.1:8088
 
 ## Required Settings
 
-Add these values to `web/sites/default/settings.php` or `settings.local.php`. Keep the JWT secret outside version control.
+Add these values to `web/sites/default/settings.php` or `settings.local.php`. Keep secrets outside version control. The `.env.example` file documents the same values for hosting platforms that inject environment variables.
 
 ```php
 $settings['auth_api_jwt_secret'] = getenv('AUTH_JWT_SECRET') ?: 'replace-with-at-least-32-random-characters';
